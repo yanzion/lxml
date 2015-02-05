@@ -4,7 +4,8 @@ __doc__ = """External interface to the BeautifulSoup HTML parser.
 __all__ = ["fromstring", "parse", "convert_tree"]
 
 from lxml import etree, html
-from BeautifulSoup import \
+# BeautifulSoup's not under development, use BeautifulSoup4(bs4) instead.
+from bs4 import \
      BeautifulSoup, Tag, Comment, ProcessingInstruction, NavigableString
 
 
@@ -61,8 +62,9 @@ def _parse(source, beautifulsoup, makeelement, **bsargs):
         beautifulsoup = BeautifulSoup
     if makeelement is None:
         makeelement = html.html_parser.makeelement
-    if 'convertEntities' not in bsargs:
-        bsargs['convertEntities'] = 'html'
+# 'convertEntities' is deprecated
+#    if 'convertEntities' not in bsargs:
+#        bsargs['convertEntities'] = 'html'
     tree = beautifulsoup(source, **bsargs)
     root = _convert_tree(tree, makeelement)
     # from ET: wrap the document in a html root element, if necessary
@@ -83,7 +85,7 @@ def _convert_children(parent, beautiful_soup_tree, makeelement):
     for child in beautiful_soup_tree:
         if isinstance(child, Tag):
             et_child = SubElement(parent, child.name, attrib=dict(
-                [(k, unescape(v)) for (k,v) in child.attrs]))
+                [(k, unescape(v)) for (k,v) in child.attrs.items()]))
             _convert_children(et_child, child, makeelement)
         elif type(child) is NavigableString:
             _append_text(parent, et_child, unescape(child))
